@@ -2,102 +2,254 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>روابط</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لوحة التحكم | إنشاء الروابط</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; padding: 40px; text-align: center; background-color: #f4f7f6; }
-        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input[type="url"] { width: 90%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; background-color: #117852; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #0c5b3d; }
-        .result-box { margin-top: 20px; padding: 15px; background: #e6f2eb; border-radius: 4px; display: none; word-break: break-all; }
-        .copy-btn { background-color: #007bff; margin-top: 10px; }
+        :root {
+            --primary-color: #117852;
+            --primary-hover: #0c5b3d;
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* تصميم البطاقة الحديث */
+        .card {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 450px;
+            padding: 35px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .header-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .card h2 {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* حقل الإدخال المتجاوب */
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 16px;
+            font-size: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            direction: ltr;
+        }
+
+        input[type="url"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* الأزرار */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* صندوق النتيجة */
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border: 2px dashed var(--primary-color);
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-box p {
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        #shortenedUrl {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            word-break: break-all;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            direction: ltr;
+        }
+
+        .copy-btn {
+            background-color: #3b82f6;
+            padding: 12px;
+            font-size: 1rem;
+        }
+
+        .copy-btn:hover {
+            background-color: #2563eb;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>أداة إنشاء الروابط</h2>
-    <p>أدخل الرابط النهائي (مثل: https://www.google.com):</p>
-    <input type="url" id="targetUrl" placeholder="https://..." required>
-    <br>
-    <button onclick="generateAndShorten()">توليد واختصار</button>
+    <div class="card">
+        <div class="header-icon">🔗</div>
+        <h2>أداة إنشاء الروابط السريعة</h2>
+        <p>قم بإنشاء روابط توجيه مختصرة وجاهزة للاستخدام بضغطة زر واحدة.</p>
 
-    <div id="resultContainer" class="result-box">
-        <p>رابط التتبع المختصر:</p>
-        <strong id="shortenedUrl"></strong>
-        <br>
-        <button class="copy-btn" onclick="copyToClipboard()">نسخ الرابط</button>
+        <div class="input-group">
+            <label for="targetUrl">الرابط النهائي (الوجهة):</label>
+            <input type="url" id="targetUrl" placeholder="https://www.example.com" required>
+        </div>
+
+        <button id="generateBtn" class="btn" onclick="generateAndShorten()">
+            <span>توليد واختصار</span>
+            <span>⚡</span>
+        </button>
+
+        <div id="resultContainer" class="result-box">
+            <p>✅ تم إنشاء الرابط بنجاح:</p>
+            <strong id="shortenedUrl"></strong>
+            <button class="btn copy-btn" onclick="copyToClipboard()">
+                <span>نسخ الرابط</span>
+                <span>📋</span>
+            </button>
+        </div>
     </div>
-</div>
 
-<script>
-   // المسار العام لصفحة التتبع الخاصة بك
-    const BASE_URL = "https://serviceio.github.io/go/";
+    <script>
+        // المسار العام لصفحة التتبع الخاصة بك (لا تقم بتغييره)
+        const BASE_URL = "https://serviceio.github.io/go/";
 
-    function generateAndShorten() {
-        const inputUrl = document.getElementById('targetUrl').value;
-        if (!inputUrl) {
-            alert('رجاءً أدخل رابطاً صالحاً أولاً.');
-            return;
+        function generateAndShorten() {
+            const inputUrl = document.getElementById('targetUrl').value.trim();
+            if (!inputUrl) {
+                alert('رجاءً أدخل رابطاً صحيحاً يبدأ بـ http أو https');
+                return;
+            }
+
+            // دمج مسار موقعك مع الرابط الهدف
+            const fullCombinedUrl = `${BASE_URL}?url=${encodeURIComponent(inputUrl)}`;
+
+            // التحكم بحالة الزر أثناء التحميل
+            const btn = document.getElementById('generateBtn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = "<span>جاري الاختصار...</span><span>⏳</span>";
+            btn.disabled = true;
+
+            // إخفاء النتيجة السابقة إن وجدت
+            document.getElementById('resultContainer').style.display = 'none';
+
+            // طلب الاختصار من TinyURL
+            const apiUrl = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(fullCombinedUrl)}`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('فشل الاتصال بالخادم');
+                    return response.text(); 
+                })
+                .then(shortUrl => {
+                    // عرض النتيجة
+                    document.getElementById('shortenedUrl').innerText = shortUrl;
+                    document.getElementById('resultContainer').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة مرة أخرى.');
+                })
+                .finally(() => {
+                    // إعادة الزر لحالته الطبيعية
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                });
         }
 
-        // دمج مسار موقعك مع الرابط الهدف
-        const fullCombinedUrl = `${BASE_URL}?url=${encodeURIComponent(inputUrl)}`;
-
-        // تعطيل الزر وتغيير النص لتوضيح حالة التحميل
-        const btn = document.querySelector('button');
-        const originalText = btn.innerText;
-        btn.innerText = "جاري الاختصار...";
-        btn.disabled = true;
-
-        // 1. إنشاء اسم دالة فريد لكل طلب (لتجنب التداخل)
-        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-
-        // 2. تعريف الدالة التي ستستقبل الاستجابة من is.gd
-        window[callbackName] = function(data) {
-            // تنظيف الكود بعد الاستخدام
-            delete window[callbackName];
-            document.body.removeChild(script);
-
-            // إعادة الزر لحالته الطبيعية
-            btn.innerText = originalText;
-            btn.disabled = false;
-
-            if (data.shorturl) {
-                document.getElementById('shortenedUrl').innerText = data.shorturl;
-                document.getElementById('resultContainer').style.display = 'block';
-            } else {
-                alert('خطأ من خدمة الاختصار: ' + (data.errormessage || 'غير معروف'));
-            }
-        };
-
-        // 3. إنشاء وسم السكربت وطلب البيانات باستخدام تقنية JSONP
-        const script = document.createElement('script');
-        // نمرر اسم الدالة في معامل callback
-        script.src = `https://is.gd/create.php?format=json&url=${encodeURIComponent(fullCombinedUrl)}&callback=${callbackName}`;
-
-        // 4. التعامل مع فشل الاتصال كلياً (مثلاً انقطاع الإنترنت)
-        script.onerror = function() {
-            delete window[callbackName];
-            document.body.removeChild(script);
-            btn.innerText = originalText;
-            btn.disabled = false;
-            alert('تعذر الاتصال بخدمة is.gd نهائياً. تأكد من اتصالك بالإنترنت.');
-        };
-
-        // تشغيل الطلب
-        document.body.appendChild(script);
-    }
-
-    function copyToClipboard() {
-        const textToCopy = document.getElementById('shortenedUrl').innerText;
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            alert('تم نسخ الرابط إلى الحافظة بنجاح!');
-        }).catch(err => {
-            alert('فشل النسخ التلقائي، يمكنك نسخه يدوياً.');
-        });
-    }
-</script>
+        function copyToClipboard() {
+            const textToCopy = document.getElementById('shortenedUrl').innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const copyBtn = document.querySelector('.copy-btn span:first-child');
+                copyBtn.innerText = "تم النسخ!";
+                setTimeout(() => copyBtn.innerText = "نسخ الرابط", 2000);
+            }).catch(err => {
+                alert('عذراً، فشل النسخ التلقائي. يرجى نسخه يدوياً.');
+            });
+        }
+    </script>
 </body>
 </html>
