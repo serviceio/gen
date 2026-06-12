@@ -39,11 +39,20 @@
         const inputUrl = document.getElementById('targetUrl').value;
         if (!inputUrl) return alert('أدخل رابطاً صالحاً.');
 
-        // دمج مسار موقعك مع الرابط الهدف
+        // 1. دمج مسار موقعك مع الرابط الهدف
         const fullUrl = `${BASE_URL}?url=${encodeURIComponent(inputUrl)}`;
         
-        // استدعاء API خدمة is.gd للاختصار
-        const apiUrl = `https://is.gd/create.php?format=json&url=${encodeURIComponent(fullUrl)}`;
+        // 2. رابط API الأصلي لخدمة is.gd
+        const isGdApi = `https://is.gd/create.php?format=json&url=${encodeURIComponent(fullUrl)}`;
+
+        // 3. إضافة وسيط (Proxy) لتخطي مشكلة CORS والسماح للمتصفح بقراءة الاستجابة
+        const apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(isGdApi)}`;
+
+        // تعطيل الزر مؤقتاً وتغيير النص لتوضيح حالة التحميل
+        const btn = document.querySelector('button');
+        const originalText = btn.innerText;
+        btn.innerText = "جاري الاختصار...";
+        btn.disabled = true;
 
         fetch(apiUrl)
             .then(res => res.json())
@@ -52,9 +61,18 @@
                     document.getElementById('shortenedUrl').innerText = data.shorturl;
                     document.getElementById('resultContainer').style.display = 'block';
                 } else {
-                    alert('خطأ في الاختصار: ' + data.errormessage);
+                    alert('خطأ من خدمة الاختصار: ' + (data.errormessage || 'غير معروف'));
                 }
-            }).catch(err => alert('حدث خطأ في الاتصال بالخادم.'));
+            })
+            .catch(err => {
+                console.error("تفاصيل الخطأ:", err);
+                alert('حدث خطأ في الاتصال بالخادم، قد تكون الخدمة محجوبة أو الوسيط لا يستجيب.');
+            })
+            .finally(() => {
+                // إعادة الزر لحالته الطبيعية بعد الانتهاء
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
     }
 
     function copyToClipboard() {
