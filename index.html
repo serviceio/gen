@@ -216,18 +216,28 @@
             // إخفاء النتيجة السابقة إن وجدت
             document.getElementById('resultContainer').style.display = 'none';
 
-            // طلب الاختصار من TinyURL
-            const apiUrl = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(fullCombinedUrl)}`;
-
-            fetch(apiUrl)
+            // استخدام خدمة Spoo.me (بدون صفحة انتظار وسريعة جداً)
+            fetch("https://spoo.me/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"
+                },
+                // إرسال الرابط كبيانات نموذج (Form Data)
+                body: `url=${encodeURIComponent(fullCombinedUrl)}`
+            })
                 .then(response => {
                     if (!response.ok) throw new Error('فشل الاتصال بالخادم');
-                    return response.text(); 
+                    return response.json(); 
                 })
-                .then(shortUrl => {
-                    // عرض النتيجة
-                    document.getElementById('shortenedUrl').innerText = shortUrl;
-                    document.getElementById('resultContainer').style.display = 'block';
+                .then(data => {
+                    if (data.short_url) {
+                        // عرض النتيجة
+                        document.getElementById('shortenedUrl').innerText = data.short_url;
+                        document.getElementById('resultContainer').style.display = 'block';
+                    } else {
+                        throw new Error('لم يتم توليد الرابط');
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);
