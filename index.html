@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>روابط</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 40px; text-align: center; background-color: #f4f7f6; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input[type="url"] { width: 90%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #117852; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0c5b3d; }
+        .result-box { margin-top: 20px; padding: 15px; background: #e6f2eb; border-radius: 4px; display: none; word-break: break-all; }
+        .copy-btn { background-color: #007bff; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>أداة إنشاء الروابط</h2>
+    <p>أدخل الرابط النهائي (مثل: https://www.google.com):</p>
+    <input type="url" id="targetUrl" placeholder="https://..." required>
+    <br>
+    <button onclick="generateAndShorten()">توليد واختصار</button>
+
+    <div id="resultContainer" class="result-box">
+        <p>رابط التتبع المختصر:</p>
+        <strong id="shortenedUrl"></strong>
+        <br>
+        <button class="copy-btn" onclick="copyToClipboard()">نسخ الرابط</button>
+    </div>
+</div>
+
+<script>
+    // المسار العام لصفحة التتبع الخاصة بك
+    const BASE_URL = "https://serviceio.github.io/go/";
+
+    function generateAndShorten() {
+        const inputUrl = document.getElementById('targetUrl').value;
+        if (!inputUrl) return alert('أدخل رابطاً صالحاً.');
+
+        // دمج مسار موقعك مع الرابط الهدف
+        const fullUrl = `${BASE_URL}?url=${encodeURIComponent(inputUrl)}`;
+        
+        // استدعاء API خدمة is.gd للاختصار
+        const apiUrl = `https://is.gd/create.php?format=json&url=${encodeURIComponent(fullUrl)}`;
+
+        fetch(apiUrl)
+            .then(res => res.json())
+            .then(data => {
+                if (data.shorturl) {
+                    document.getElementById('shortenedUrl').innerText = data.shorturl;
+                    document.getElementById('resultContainer').style.display = 'block';
+                } else {
+                    alert('خطأ في الاختصار: ' + data.errormessage);
+                }
+            }).catch(err => alert('حدث خطأ في الاتصال بالخادم.'));
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('shortenedUrl').innerText;
+        navigator.clipboard.writeText(text).then(() => alert('تم النسخ بنجاح!'));
+    }
+</script>
+</body>
+</html>
