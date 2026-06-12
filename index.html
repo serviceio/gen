@@ -32,52 +32,71 @@
 </div>
 
 <script>
-    // المسار العام لصفحة التتبع الخاصة بك
+   // المسار العام لصفحة التتبع الخاصة بك
     const BASE_URL = "https://serviceio.github.io/go/";
 
     function generateAndShorten() {
         const inputUrl = document.getElementById('targetUrl').value;
-        if (!inputUrl) return alert('أدخل رابطاً صالحاً.');
+        if (!inputUrl) {
+            alert('رجاءً أدخل رابطاً صالحاً أولاً.');
+            return;
+        }
 
-        // 1. دمج مسار موقعك مع الرابط الهدف
-        const fullUrl = `${BASE_URL}?url=${encodeURIComponent(inputUrl)}`;
-        
-        // 2. رابط API الأصلي لخدمة is.gd
-        const isGdApi = `https://is.gd/create.php?format=json&url=${encodeURIComponent(fullUrl)}`;
+        // دمج مسار موقعك مع الرابط الهدف
+        const fullCombinedUrl = `${BASE_URL}?url=${encodeURIComponent(inputUrl)}`;
 
-        // 3. إضافة وسيط (Proxy) لتخطي مشكلة CORS والسماح للمتصفح بقراءة الاستجابة
-        const apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(isGdApi)}`;
-
-        // تعطيل الزر مؤقتاً وتغيير النص لتوضيح حالة التحميل
+        // تعطيل الزر وتغيير النص لتوضيح حالة التحميل
         const btn = document.querySelector('button');
         const originalText = btn.innerText;
         btn.innerText = "جاري الاختصار...";
         btn.disabled = true;
 
-        fetch(apiUrl)
-            .then(res => res.json())
-            .then(data => {
-                if (data.shorturl) {
-                    document.getElementById('shortenedUrl').innerText = data.shorturl;
-                    document.getElementById('resultContainer').style.display = 'block';
-                } else {
-                    alert('خطأ من خدمة الاختصار: ' + (data.errormessage || 'غير معروف'));
-                }
-            })
-            .catch(err => {
-                console.error("تفاصيل الخطأ:", err);
-                alert('حدث خطأ في الاتصال بالخادم، قد تكون الخدمة محجوبة أو الوسيط لا يستجيب.');
-            })
-            .finally(() => {
-                // إعادة الزر لحالته الطبيعية بعد الانتهاء
-                btn.innerText = originalText;
-                btn.disabled = false;
-            });
+        // 1. إنشاء اسم دالة فريد لكل طلب (لتجنب التداخل)
+        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+
+        // 2. تعريف الدالة التي ستستقبل الاستجابة من is.gd
+        window[callbackName] = function(data) {
+            // تنظيف الكود بعد الاستخدام
+            delete window[callbackName];
+            document.body.removeChild(script);
+
+            // إعادة الزر لحالته الطبيعية
+            btn.innerText = originalText;
+            btn.disabled = false;
+
+            if (data.shorturl) {
+                document.getElementById('shortenedUrl').innerText = data.shorturl;
+                document.getElementById('resultContainer').style.display = 'block';
+            } else {
+                alert('خطأ من خدمة الاختصار: ' + (data.errormessage || 'غير معروف'));
+            }
+        };
+
+        // 3. إنشاء وسم السكربت وطلب البيانات باستخدام تقنية JSONP
+        const script = document.createElement('script');
+        // نمرر اسم الدالة في معامل callback
+        script.src = `https://is.gd/create.php?format=json&url=${encodeURIComponent(fullCombinedUrl)}&callback=${callbackName}`;
+
+        // 4. التعامل مع فشل الاتصال كلياً (مثلاً انقطاع الإنترنت)
+        script.onerror = function() {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            btn.innerText = originalText;
+            btn.disabled = false;
+            alert('تعذر الاتصال بخدمة is.gd نهائياً. تأكد من اتصالك بالإنترنت.');
+        };
+
+        // تشغيل الطلب
+        document.body.appendChild(script);
     }
 
     function copyToClipboard() {
-        const text = document.getElementById('shortenedUrl').innerText;
-        navigator.clipboard.writeText(text).then(() => alert('تم النسخ بنجاح!'));
+        const textToCopy = document.getElementById('shortenedUrl').innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('تم نسخ الرابط إلى الحافظة بنجاح!');
+        }).catch(err => {
+            alert('فشل النسخ التلقائي، يمكنك نسخه يدوياً.');
+        });
     }
 </script>
 </body>
